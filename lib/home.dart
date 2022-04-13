@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:location/location.dart';
 import 'package:project/call.dart';
 import 'package:project/models/driver.dart';
@@ -24,7 +25,7 @@ class _HomePageState extends State<HomePage> {
           _isLoading
               ? const Center(
                   child: SpinKitWave(
-                  color: Colors.blue,
+                  color: Color.fromARGB(170, 59, 50, 231),
                   size: 70.0,
                   type: SpinKitWaveType.start,
                 ))
@@ -34,13 +35,19 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      SvgPicture.asset(
+                        "assets/doctor.svg",
+                        height: 225,
+                      ),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(15),
-                        height: 80,
+                        height: 90,
                         child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              primary: const Color.fromARGB(170, 59, 50, 231)),
                           child: const Text(
-                            "Click",
+                            "FIND DRIVER",
                             style: TextStyle(fontSize: 16),
                           ),
                           onPressed: () async {
@@ -71,6 +78,7 @@ class _HomePageState extends State<HomePage> {
                               }
                             }
                             _locationData = await location.getLocation();
+                            // ignore: avoid_print
                             print(_locationData);
                             Response response;
                             var dio = Dio();
