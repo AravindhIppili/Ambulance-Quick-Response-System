@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:project/general/call.dart';
 import 'package:project/driver/login.dart';
 import 'package:project/models/driver.dart';
@@ -45,9 +45,21 @@ class _HomePageState extends State<HomePage> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                               primary: const Color.fromARGB(170, 59, 50, 231)),
-                          child: const Text(
-                            "FIND DRIVER",
-                            style: TextStyle(fontSize: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Text(
+                                "FIND DRIVER",
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Icon(
+                                Icons.local_shipping,
+                                color: Colors.white,
+                              ),
+                            ],
                           ),
                           onPressed: getDriver,
                         ),
@@ -58,7 +70,7 @@ class _HomePageState extends State<HomePage> {
                         height: 90,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.white,
+                            primary: const Color.fromRGBO(255, 255, 255, 1),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -101,43 +113,65 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _isLoading = true;
     });
-    Location location = Location();
+    // Location location = Location();
 
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
-    LocationData _locationData;
+    // bool _serviceEnabled;
+    // PermissionStatus _permissionGranted;
+    // LocationData _locationData;
 
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        return;
+    // _serviceEnabled = await location.serviceEnabled();
+    // if (!_serviceEnabled) {
+    //   _serviceEnabled = await location.requestService();
+    //   if (!_serviceEnabled) {
+    //     return;
+    //   }
+    // }
+
+    // _permissionGranted = await location.hasPermission();
+    // if (_permissionGranted == PermissionStatus.denied) {
+    //   _permissionGranted = await location.requestPermission();
+    //   if (_permissionGranted != PermissionStatus.granted) {
+    //     return;
+    //   }
+    // }
+    // _locationData = await location.getLocation();
+    // // ignore: avoid_print
+    // print(_locationData);
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
       }
     }
 
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        return;
-      }
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
     }
-    _locationData = await location.getLocation();
+
+    Position position = await Geolocator.getCurrentPosition();
     // ignore: avoid_print
-    print(_locationData);
+    print(position);
     Response response;
     var dio = Dio();
     response = await dio.post(
         "https://ambulance-quick-response.herokuapp.com/nearest",
-        data: {"long": _locationData.longitude, "lat": _locationData.latitude});
+        data: {"long": position.longitude, "lat": position.latitude});
     setState(() {
       _isLoading = false;
     });
     List<dynamic> drivers =
         response.data.map((driver) => Driver.fromJson(driver)).toList();
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (builder) => CallDriver(driver: drivers[0])));
+    Navigator.push(context,
+        MaterialPageRoute(builder: (builder) => CallDriver(drivers: drivers)));
   }
 }

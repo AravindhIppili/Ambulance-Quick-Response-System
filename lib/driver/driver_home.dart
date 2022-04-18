@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:project/models/driver.dart';
 import 'package:project/services/auth.dart';
 import 'package:project/widgets/loading.dart';
@@ -27,23 +29,24 @@ class _DriverHomePageState extends State<DriverHomePage> {
 
   void getDriver() async {
     email = AuthenticationService().email;
-    driver = Driver(
-        id: 1,
-        name: "Surya",
-        address: "address",
-        vanNo: "AP2143",
-        phoneNumber: "9666545112",
-        lat: 12.344,
-        long: 13.231,
-        available: true,
-        email: email);
-    // Response response;
-    // var dio = Dio();
-    // response = await dio
-    //     .get("https://ambulance-quick-response.herokuapp.com/getdriver/$email");
+    // driver = Driver(
+    //     id: 1,
+    //     name: "Surya",
+    //     address: "address",
+    //     vanNo: "AP2143",
+    //     phoneNumber: "9666545112",
+    //     lat: 12.344,
+    //     long: 13.231,
+    //     available: true,
+    //     email: email);
+    Response response;
+    var dio = Dio();
+    response = await dio
+        .get("https://ambulance-quick-response.herokuapp.com/getdriver/$email");
 
-    // driver = Driver.fromJson(response.data[0]);
+    driver = Driver.fromJson(response.data[0]);
     isAvailable = driver!.available;
+    updateCoords();
     setState(() {
       _isLoading = false;
     });
@@ -66,6 +69,7 @@ class _DriverHomePageState extends State<DriverHomePage> {
         ],
         title: const Text("Driver"),
       ),
+      
       body: _isLoading
           ? const Loading()
           : Container(
@@ -73,10 +77,11 @@ class _DriverHomePageState extends State<DriverHomePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Image.asset("assets/ambulance.png"),
                   Text(
                     "Hi ${driver!.name}",
                     style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
+                        fontSize: 25, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(
                     height: 30,
@@ -108,6 +113,22 @@ class _DriverHomePageState extends State<DriverHomePage> {
                         ),
                         onPressed: onClickLock),
                   ),
+                  // const SizedBox(height: 30,),
+                  // Container(
+                  //   width: double.infinity,
+                  //   padding: const EdgeInsets.symmetric(vertical: 15),
+                  //   height: 90,
+                  //   child: ElevatedButton(
+                  //       style: ElevatedButton.styleFrom(
+                  //           primary: const Color.fromARGB(170, 59, 50, 231)),
+                  //       child: const Text(
+                  //         "UPDATE Profile",
+                  //         style: TextStyle(fontSize: 16),
+                  //       ),
+                  //       onPressed: (){
+
+                  //       }),
+                  // ),
                 ],
               ),
             ),
@@ -144,32 +165,48 @@ class _DriverHomePageState extends State<DriverHomePage> {
   }
 
   void updateCoords() async {
-    Location location = Location();
+    bool serviceEnabled;
+    LocationPermission permission;
 
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
-    LocationData _locationData;
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      Future.error('Location services are disabled.');
+    }
 
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        return;
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
       }
     }
 
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        return;
-      }
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
     }
-    _locationData = await location.getLocation();
-    // ignore: avoid_print
-    print(_locationData);
+    Position positionMain = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    LocationSettings locationSettings = const LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 100,
+    );
+    StreamSubscription<Position> positionStream =
+        Geolocator.getPositionStream(locationSettings: locationSettings)
+            .listen((Position? position) {
+      positionMain = position!;
+      // ignore: avoid_print
+      print(position == null
+          ? 'Unknown'
+          : '${position.latitude.toString()}, ${position.longitude.toString()}');
+    });
     var dio = Dio();
-    await dio.post("https://ambulance-quick-response.herokuapp.com/updateCoords",
-        data: {"long": _locationData.longitude, "lat": _locationData.latitude,"email":email});
+    await dio.post(
+        "https://ambulance-quick-response.herokuapp.com/updateCoords",
+        data: {
+          "long": positionMain.longitude,
+          "lat": positionMain.latitude,
+          "email": email
+        });
   }
 }

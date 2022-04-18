@@ -18,6 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
+  bool _obscure = true;
   @override
   void dispose() {
     _usernameController!.dispose();
@@ -50,8 +51,20 @@ class _LoginPageState extends State<LoginPage> {
                         }
                         return null;
                       },
+                      cursorColor: const Color.fromARGB(170, 59, 50, 231),
                       decoration: const InputDecoration(
-                        labelText: "Username",
+                        label: Text(
+                            "Username",
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                color: Color.fromARGB(170, 59, 50, 231)),
+                          ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              width: 2,
+                              color: Color.fromARGB(170, 59, 50, 231)),
+                        ),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(
                               color: Color.fromARGB(170, 59, 50, 231)),
@@ -69,13 +82,35 @@ class _LoginPageState extends State<LoginPage> {
                         }
                         return null;
                       },
-                      decoration: const InputDecoration(
-                        labelText: "Password",
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Color.fromARGB(170, 59, 50, 231)),
-                        ),
-                      ),
+                      obscureText: _obscure,
+                      cursorColor: const Color.fromARGB(170, 59, 50, 231),
+                      decoration: InputDecoration(
+                          label: const Text(
+                            "Password",
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                color: Color.fromARGB(170, 59, 50, 231)),
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(
+                                width: 2,
+                                color: Color.fromARGB(170, 59, 50, 231)),
+                          ),
+                          border: const OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Color.fromARGB(170, 59, 50, 231)),
+                          ),
+                          suffixIcon: IconButton(
+                              color: const Color.fromARGB(170, 59, 50, 231),
+                              onPressed: () {
+                                setState(() {
+                                  _obscure = !_obscure;
+                                });
+                              },
+                              icon: _obscure
+                                  ? const Icon(Icons.visibility)
+                                  : const Icon(Icons.visibility_off))),
                     ),
                     const SizedBox(
                       height: 30,

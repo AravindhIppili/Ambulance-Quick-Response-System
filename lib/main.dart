@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:project/home.dart';
 import 'package:project/driver/driver_home.dart';
 import 'package:project/services/auth.dart';
@@ -10,7 +11,6 @@ import 'models/user.dart';
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
   runApp(const MyApp());
 }
 
@@ -42,7 +42,7 @@ class Wrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthenticationService>(context);
-
+    FlutterNativeSplash.remove();
     return StreamBuilder<AppUser?>(
         stream: authService.user,
         builder: (context, snapshot) {

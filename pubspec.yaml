@@ -29,7 +29,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  location: ^4.2.0
   geolocator: ^8.2.0
   dio:
   flutter_phone_direct_caller: ^2.1.0
@@ -69,9 +68,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/splash.jpg
-    - assets/doctor.svg
-    - assets/doc2.svg
+    - assets/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -98,3 +95,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+flutter_native_splash:
+  color: "#42a5f5"
