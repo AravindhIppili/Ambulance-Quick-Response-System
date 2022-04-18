@@ -133,8 +133,11 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _isLoading = false;
     });
-    Driver driver = Driver.fromJson(response.data[0]);
-    Navigator.push(context,
-        MaterialPageRoute(builder: (builder) => CallDriver(driver: driver)));
+    List<dynamic> drivers =
+        response.data.map((driver) => Driver.fromJson(driver)).toList();
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (builder) => CallDriver(driver: drivers[0])));
   }
 }

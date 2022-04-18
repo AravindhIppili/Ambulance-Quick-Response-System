@@ -96,13 +96,31 @@ class _LoginPageState extends State<LoginPage> {
                             setState(() {
                               _isLoading = true;
                             });
-                            await authService.signIn(
+                            dynamic res = await authService.signIn(
                                 email: _usernameController!.text + "@gmail.com",
                                 password: _passwordController!.text);
                             setState(() {
                               _isLoading = false;
                             });
-                            Navigator.pop(context);
+                            if (res == null) {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: const Text("Invalid Details"),
+                                      content: const Text("Check the details"),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Text("Ok"))
+                                      ],
+                                    );
+                                  });
+                            } else {
+                              Navigator.pop(context);
+                            }
                           }
                         },
                       ),

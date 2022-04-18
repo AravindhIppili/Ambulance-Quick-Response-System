@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:project/home.dart';
-import 'package:project/driver/firstpage.dart';
+import 'package:project/driver/driver_home.dart';
 import 'package:project/services/auth.dart';
 import 'package:project/widgets/loading.dart';
 import 'package:provider/provider.dart';
@@ -53,7 +53,7 @@ class Wrapper extends StatelessWidget {
               child: Text("Something went wrong!!"),
             );
           } else if (snapshot.hasData) {
-            return const FirstPage();
+            return const DriverHomePage();
           } else {
             return const HomePage();
           }

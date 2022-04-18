@@ -9,10 +9,9 @@ class Loading extends StatelessWidget {
     return Container(
       color: Colors.white,
       child: const Center(
-          child: SpinKitWave(
+          child: SpinKitThreeBounce(
         color: Color.fromARGB(170, 59, 50, 231),
-        size: 70.0,
-        type: SpinKitWaveType.start,
+        size: 30,
       )),
     );
   }

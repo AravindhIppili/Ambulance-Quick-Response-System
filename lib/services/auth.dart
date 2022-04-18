@@ -9,6 +9,8 @@ class AuthenticationService {
     return AppUser(user.uid, user.email);
   }
 
+  String get email => _firebaseAuth.currentUser!.email.toString();
+
   Stream<AppUser?> get user {
     return _firebaseAuth.authStateChanges().map(_userFromFB);
   }
